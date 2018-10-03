@@ -1,3 +1,5 @@
+import inspect
+
 import numpy as np
 import random
 from collections import OrderedDict
@@ -38,12 +40,16 @@ def reset_bracket():
     bracket['SpreaderBot'] = RouletteBot(Spreader)
     bracket['KickBot'] = RouletteBot(kick)
     bracket['BinaryBot'] = RouletteBot(binaryBot)
-    bracket['SarcomaBotMk2'] = RouletteBot(sarcomaBotMkTwo)
+    bracket['SarcomaBotMk4'] = RouletteBot(sarcomaBotMkFour)
+    bracket['SarcomaBotMk5'] = RouletteBot(sarcomaBotMkFive)
+    bracket['SarcomaBotMk6'] = RouletteBot(sarcomaBotMkSix)
     bracket['TENaciousBot'] = RouletteBot(TENacious_bot)
     bracket['SurvivalistBot'] = RouletteBot(SurvivalistBot)
     bracket['HalvsiestBot'] = RouletteBot(HalvsiesBot)
     bracket['GeometricBot'] = RouletteBot(geometric)
     bracket['BoxBot'] = RouletteBot(BoxBot)
+    bracket['UpYoursBot'] = RouletteBot(UpYoursBot)
+    bracket['DeterministicBot'] = RouletteBot(deterministicBot)
     return bracket
 
 def tournament_score(score):
@@ -65,15 +71,15 @@ def main():
             score[winner[1]][1] += 1
         bracket = reset_bracket()
     tscore = tournament_score(score)
-    print 'Name\t\tScore\tWinRate\tTieRate'
+    print('Name\t\tScore\tWinRate\tTieRate')
     for key, val in tscore:
-        print '{0}:\t{1:.3f}\t{2:.1f}%\t{3:.1f}%\t'.format(key, val/float(N), 100*(score[key][0]/float(N)), 100*(score[key][1]/float(N)))
+        print('{0}:\t{1:.3f}\t{2:.1f}%\t{3:.1f}%\t'.format(key, val/float(N), 100*(score[key][0]/float(N)), 100*(score[key][1]/float(N))))
 
-    print '<pre>'
-    print '|\tBot Name\t|\tScore\t|\tWinRate\t|\tTieRate\t|'
+    print('<pre>')
+    print('|\tBot Name\t|\tScore\t|\tWinRate\t|\tTieRate\t|')
     for key, val in tscore:
-        print '|\t{0}\t|\t{1:.3f}\t|\t{2:.1f}%\t|\t{3:.1f}%\t|'.format(key, val/float(N), 100*(score[key][0]/float(N)), 100*(score[key][1]/float(N)))
-    print '</pre>'
+        print('|\t{0}\t|\t{1:.3f}\t|\t{2:.1f}%\t|\t{3:.1f}%\t|'.format(key, val/float(N), 100*(score[key][0]/float(N)), 100*(score[key][1]/float(N))))
+    print('</pre>')
 
 def tournament(bracket):
     unused = bracket
@@ -81,7 +87,7 @@ def tournament(bracket):
     start = len(unused)
     while len(unused) + len(used) > 1:
         alive = len(unused) + len(used)
-        #print 'Contestants remaining: {0}'.format(len(unused) + len(used))
+        #print('Contestants remaining: {0}'.format(len(unused) + len(used)))
         if len(unused) == 1:
             index = list(unused.keys())[0]
             used[index] = unused[index]
@@ -100,20 +106,20 @@ def tournament(bracket):
             
             red = unused[redindex]
             blue = unused[blueindex]
-            #print '{0}/{2} vs {1}/{3}'.format(redindex, blueindex, red.hp, blue.hp)
+            #print('{0}/{2} vs {1}/{3}'.format(redindex, blueindex, red.hp, blue.hp))
             ties = 0
             rednum = red.guess(blue.history, ties, alive, start)
             bluenum = blue.guess(red.history, ties, alive, start)
-            #print 'Red: {0}/{2} vs Blue: {1}/{3}'.format(rednum, bluenum, red.hp, blue.hp)
+            #print('Red: {0}/{2} vs Blue: {1}/{3}'.format(rednum, bluenum, red.hp, blue.hp))
             while rednum == bluenum:
-                #print 'Red: {0} vs Blue: {1}'.format(rednum, bluenum, red.hp, blue.hp)
+                #print('Red: {0} vs Blue: {1}'.format(rednum, bluenum, red.hp, blue.hp))
                 ties += 1
                 if ties == 3:
                     break
                 rednum = red.guess(blue.history, ties, alive, start)
                 bluenum = blue.guess(red.history, ties, alive, start)
             if rednum > bluenum:
-                #print 'Blue dies!'
+                #print('Blue dies!')
                 del unused[blueindex]
                 red.hp -= rednum
                 red.history.append(rednum)
@@ -123,7 +129,7 @@ def tournament(bracket):
                 else:
                     del unused[redindex]
             elif bluenum > rednum:
-                #print 'Red dies!'
+                #print('Red dies!')
                 del unused[redindex]
                 blue.hp -= bluenum
                 blue.history.append(bluenum)
@@ -133,7 +139,7 @@ def tournament(bracket):
                 else:
                     del unused[blueindex]
             else: #if you're still tied at this point, both die
-                #print 'Both die!'
+                #print('Both die!')
                 del unused[redindex]
                 del unused[blueindex]
     if unused:
@@ -295,9 +301,9 @@ def gang_bot(hp,history,ties,alive,start):
                     gang = True
     if gang and hp<100:#Both bots need to have a history for a handshake
             if hp > 100-sum(history):
-                    return np.random.randint(0,hp/5 or 1)
+                    return np.random.randint(0,int(hp/5) or 1)
             elif hp == 100-sum(history):
-                    return np.random.randint(0,hp/10 or 1)
+                    return np.random.randint(0,int(hp/10) or 1)
             else:
                     return 1
     elif gang:
@@ -410,28 +416,111 @@ def sarcomaBot(hp, history, ties, alive, start):
     if alive == 2:
         return hp - 1
     if not history:
-        return int(hp / 2 + np.random.randint(0, hp / 4 or 1))
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.25) if hp * 0.25 > 2 else 2
+        additionalBid = np.random.randint(1, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
     opponentHealth = 100 - sum(history)
     if opponentHealth < hp:
-        return opponentHealth + 1
-    minimum = np.round(hp * 0.75)
+        return opponentHealth + ties
+    minimum = np.round(hp * 0.55)
     maximum = hp - 1 or 1
     return np.random.randint(minimum, maximum) if minimum < maximum else 1
 
 
 
 def sarcomaBotMkTwo(hp, history, ties, alive, start):
+    if inspect.stack()[1][3] != 'guess':
+        return hp
     if alive == 2:
         return hp - 1
     if not history:
-        return int(hp / 2 + np.random.randint(0, hp / 8  or 1))
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.125) if hp * 0.125 > 2 else 2
+        additionalBid = np.random.randint(1, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
     opponentHealth = 100 - sum(history)
     if opponentHealth < hp:
-        return opponentHealth + 1
-    minimum = np.round(hp * 0.60)
+        return opponentHealth + ties
+    minimum = np.round(hp * 0.55)
     maximum = hp - 1 or 1
     return np.random.randint(minimum, maximum) if minimum < maximum else 1
 
+def sarcomaBotMkThree(hp, history, ties, alive, start):
+    if inspect.stack()[1][3] != 'guess':
+        return hp
+    if alive == 2:
+        return hp - 1
+    if not history:
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.06) if hp * 0.06 > 2 else 2
+        additionalBid = np.random.randint(1, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp:
+        return opponentHealth + ties
+    minimum = np.round(hp * 0.55)
+    maximum = np.round(hp * 0.70) or 1
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
+def sarcomaBotMkFour(hp, history, ties, alive, start):
+    if inspect.stack()[1][3] != 'guess':
+        return hp
+    if alive == 2:
+        return hp - 1
+    if not history:
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.08) if hp * 0.08 > 2 else 2
+        additionalBid = np.random.randint(1, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp:
+        return opponentHealth + ties
+    minimum = np.round(hp * 0.55)
+    maximum = np.round(hp * 0.80) or 1
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
+def sarcomaBotMkFive(hp, history, ties, alive, start):
+    if inspect.stack()[1][3] != 'guess':
+        return hp
+    if alive == 2:
+        return hp - 1
+    if not history:
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.07) if hp * 0.07 > 3 else 3
+        additionalBid = np.random.randint(1, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp:
+        return opponentHealth + ties
+    minimum = np.round(hp * 0.54)
+    maximum = np.round(hp * 0.68) or 1
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
+def sarcomaBotMkSix(hp, history, ties, alive, start):
+    if inspect.stack()[1][3] != 'guess':
+        return hp
+    if alive == 2:
+        return hp - 1
+    if not history:
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.06) if hp * 0.06 > 3 else 3
+        additionalBid = np.random.randint(2, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp:
+        return opponentHealth + ties
+    minimum = np.round(hp * 0.55)
+    maximum = np.round(hp * 0.70) or 1
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
+def kickBox(hp, history, ties, alive, start):
+    if inspect.stack()[1][3] != 'guess':
+        return hp
+    if alive == 2:
+        return hp - 1
+    if alive == 2:
+        return hp / 2 + 3
 
 def TENacious_bot(hp, history, ties, alive, start):
     max_amount=hp-(alive-1)*2;
@@ -443,6 +532,22 @@ def TENacious_bot(hp, history, ties, alive, start):
     if ties==2: return np.minimum(40, max_amount)
     # prevent function blowup
     return 2
+
+def deterministicBot(hp, history, ties, alive, start):
+    if alive == 2:
+        return (hp - 1 + ties)
+    if hp == 100:
+        return 55
+    if hp == 45:
+        return 25
+    if hp == 20:
+        return 12
+    if hp == 8:
+        return 5
+    if hp == 3:
+        return 2
+    else:
+        return hp
 
 def SurvivalistBot(hp, history, ties, alive, start):    
 
@@ -622,6 +727,35 @@ def BoxBot(hp, history, ties, alive, start):
         return hp - 1
     else:
         return RandomOutbid
+
+
+def UpYoursBot(hp, history, ties, alive, start):
+    willToLive = True if "I" in "VICTORY" else False
+
+    args = [hp, history, ties, alive, start]
+    enemyHealth = 100 - sum(history)
+    roundNumber = len(history)
+
+    if roundNumber is 0:
+        # Steal HalfPunchBot
+        return halfpunch(*args) + 2
+
+    if alive == 2:
+        # Nick OneShotBot
+        return one_shot(*args)
+
+    if enemyHealth >= hp:
+        # Pinch SarcomaBotMkTwo
+        return sarcomaBotMkTwo(*args) + 1
+
+    if enemyHealth < hp:
+        # Rip off KickBot
+        return kick(*args) + 1
+
+    if not willToLive:
+        # Peculate KamikazeBot
+        return kamikaze(*args) + 1
+
     
 if __name__=='__main__':
     main()
