@@ -12,7 +12,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/RobotRoulette$robot_roulette.coverage" NAME="robot-roulette Coverage Results" MODIFIED="1538654556832" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RobotRoulette$robot_roulette.coverage" NAME="robot-roulette Coverage Results" MODIFIED="1538663018944" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FUSProjectUsageTrigger">
     <session id="-240582830">
@@ -26,22 +26,22 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="1" />
+          <entry key="py" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="1" />
+          <entry key="Python" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="598" />
+          <entry key="py" value="993" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="598" />
+          <entry key="Python" value="993" />
         </counts>
       </usages-collector>
     </session>
@@ -51,8 +51,20 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/robot-roulette.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="299">
-              <caret line="40" selection-start-line="40" selection-end-line="41" selection-end-column="60" />
+            <state relative-caret-position="249">
+              <caret line="864" column="17" selection-start-line="864" selection-start-column="17" selection-end-line="864" selection-end-column="17" />
+              <folding>
+                <marker date="1538663004328" expanded="true" signature="28185:28190" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///usr/lib/python3.5/inspect.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="222">
+              <caret line="1462" column="24" lean-forward="true" selection-start-line="1462" selection-start-column="24" selection-end-line="1462" selection-end-column="62" />
             </state>
           </provider>
         </entry>
@@ -67,8 +79,9 @@
       <find>p</find>
       <find>anti_gang</find>
       <find>anti_gan</find>
-      <find>sarcoma</find>
       <find>anti_</find>
+      <find>antia</find>
+      <find>sarcoma</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -87,7 +100,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="width" value="1880" />
     <option name="height" value="1052" />
   </component>
@@ -171,7 +184,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="-1" width="1920" height="1055" extended-state="7" />
+    <frame x="0" y="-1" width="1920" height="1055" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2524013" />
@@ -188,7 +201,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="11" weight="0.32939914" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.32867885" />
       <window_info anchor="bottom" id="Python Console" order="12" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -204,10 +217,20 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file:///usr/lib/python3.5/inspect.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="222">
+          <caret line="1462" column="24" lean-forward="true" selection-start-line="1462" selection-start-column="24" selection-end-line="1462" selection-end-column="62" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/robot-roulette.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="299">
-          <caret line="40" selection-start-line="40" selection-end-line="41" selection-end-column="60" />
+        <state relative-caret-position="249">
+          <caret line="864" column="17" selection-start-line="864" selection-start-column="17" selection-end-line="864" selection-end-column="17" />
+          <folding>
+            <marker date="1538663004328" expanded="true" signature="28185:28190" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
