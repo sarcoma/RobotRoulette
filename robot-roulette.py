@@ -1,10 +1,8 @@
-import inspect
-
 import numpy as np
 import random
 from collections import OrderedDict
 import inspect
-__version__='0.1'
+__version__='0.3'
 
 class RouletteBot:
     def __init__(self, func):
@@ -14,7 +12,7 @@ class RouletteBot:
 
     def guess(self, e_history, ties, alive, start):
         num = self.func(self.hp, e_history, ties, alive, start)
-        if num > self.hp or num < 0:
+        if num > self.hp or num < 0 or not isinstance(num, int):
             num = 0
         return int(num)
 
@@ -25,7 +23,7 @@ def reset_bracket():
     bracket['RandomBot'] = RouletteBot(randombot)
     bracket['OneShotBot'] = RouletteBot(one_shot)
     bracket['OutBidBot'] = RouletteBot(outbid)
-    # bracket['PatheticBot'] = RouletteBot(pathetic_attempt_at_analytics_bot)
+    #bracket['PatheticBot'] = RouletteBot(pathetic_attempt_at_analytics_bot)
     bracket['HalfPunchBot'] = RouletteBot(halfpunch)
     bracket['KamikazeBot'] = RouletteBot(kamikaze)
     bracket['RobbieBot'] = RouletteBot(robbie_roulette)
@@ -40,7 +38,6 @@ def reset_bracket():
     bracket['TitTatBot'] = RouletteBot(tatbot)
     bracket['SpreaderBot'] = RouletteBot(Spreader)
     bracket['KickBot'] = RouletteBot(kick)
-    bracket['BinaryBot'] = RouletteBot(binaryBot)
     bracket['SarcomaBotMk4'] = RouletteBot(sarcomaBotMkFour)
     bracket['SarcomaBotMk5'] = RouletteBot(sarcomaBotMkFive)
     bracket['SarcomaBotMk6'] = RouletteBot(sarcomaBotMkSix)
@@ -51,7 +48,10 @@ def reset_bracket():
     bracket['BoxBot'] = RouletteBot(BoxBot)
     bracket['UpYoursBot'] = RouletteBot(UpYoursBot)
     bracket['AggroCalcBot'] = RouletteBot(aggresiveCalculatingBot)
-    bracket['DeterministicBot'] = RouletteBot(deterministicBot)
+    bracket['DeterminBot'] = RouletteBot(deterministicBot)
+    bracket['AAUpYoursBot'] = RouletteBot(antiantiupyoursbot)
+    bracket['GenericBot'] = RouletteBot(generic_bot)
+    # bracket['ClassyBot'] = RouletteBot(classybot)
     return bracket
 
 def tournament_score(score):
@@ -62,44 +62,51 @@ def tournament_score(score):
        
 def main():
     bracket = reset_bracket()
+    rounds = int(np.floor(np.log2(len(bracket))))
+    round_eliminated = {key: np.zeros(rounds, dtype=np.int64) for key in list(bracket.keys())}
     score = {key: [0,0] for key in list(bracket.keys())}
-    N = 100000
+    N = 10000
     for n in range(N):
         if n%100 == 0:
             print(n)
-        winner, tied = tournament(bracket)
+        winner, tied, eliminated = tournament(bracket)
         if not tied:
             score[winner][0] += 1
         else:
             score[winner[0]][1] += 1
             score[winner[1]][1] += 1
+        for key in list(eliminated.keys()):
+            round_eliminated[key][eliminated[key]] += 1
         bracket = reset_bracket()
     tscore = tournament_score(score)
-    print('Name\t\tScore\tWinRate\tTieRate')
+    print('Name\t\tScore\tWinRate\tTieRate\tElimination Probability')
     for key, val in tscore:
         print('{0}:\t{1:.3f}\t{2:.1f}%\t{3:.1f}%\t'.format(key, val/float(N), 100*(score[key][0]/float(N)), 100*(score[key][1]/float(N))))
 
     print('<pre>')
     print('|\tBot Name\t|\tScore\t|\tWinRate\t|\tTieRate\t|')
     for key, val in tscore:
-        print('|\t{0}\t|\t{1:.3f}\t|\t{2:.1f}%\t|\t{3:.1f}%\t|'.format(key, val/float(N), 100*(score[key][0]/float(N)), 100*(score[key][1]/float(N))))
-    print('</pre>')
+        print('{0}\t{1:.3f}\t{2:.1f}%\t{3:.1f}%\t{4}%'.format(key, val/float(N), 100*(score[key][0]/float(N)), 100*(score[key][1]/float(N)), np.around(round_eliminated[key]/float(N)*100,0).astype(np.int64)))
 
 def tournament(bracket):
     unused = bracket
+    eliminated = {}
     used = {}
     start = len(unused)
+    roundnum = 0
     while len(unused) + len(used) > 1:
         alive = len(unused) + len(used)
-        #print('Contestants remaining: {0}'.format(len(unused) + len(used)))
+        #print 'Contestants remaining: {0}'.format(len(unused) + len(used))
         if len(unused) == 1:
             index = list(unused.keys())[0]
             used[index] = unused[index]
             unused = used
             used = {}
+            roundnum += 1
         elif len(unused) == 0:
             unused = used
             used = {}
+            roundnum += 1
         else:
             
             redindex = np.random.choice(list(unused.keys()))
@@ -110,21 +117,22 @@ def tournament(bracket):
             
             red = unused[redindex]
             blue = unused[blueindex]
-            #print('{0}/{2} vs {1}/{3}'.format(redindex, blueindex, red.hp, blue.hp))
+            #print '{0}/{2} vs {1}/{3}'.format(redindex, blueindex, red.hp, blue.hp)
             ties = 0
             rednum = red.guess(blue.history, ties, alive, start)
             bluenum = blue.guess(red.history, ties, alive, start)
-            #print('Red: {0}/{2} vs Blue: {1}/{3}'.format(rednum, bluenum, red.hp, blue.hp))
+            #print 'Red: {0}/{2} vs Blue: {1}/{3}'.format(rednum, bluenum, red.hp, blue.hp)
             while rednum == bluenum:
-                #print('Red: {0} vs Blue: {1}'.format(rednum, bluenum, red.hp, blue.hp))
+                #print 'Red: {0} vs Blue: {1}'.format(rednum, bluenum, red.hp, blue.hp)
                 ties += 1
                 if ties == 3:
                     break
                 rednum = red.guess(blue.history, ties, alive, start)
                 bluenum = blue.guess(red.history, ties, alive, start)
             if rednum > bluenum:
-                #print('Blue dies!')
+                #print 'Blue dies!'
                 del unused[blueindex]
+                eliminated[blueindex] = roundnum
                 red.hp -= rednum
                 red.history.append(rednum)
                 if red.hp > 0:
@@ -132,9 +140,11 @@ def tournament(bracket):
                     del unused[redindex]
                 else:
                     del unused[redindex]
+                    eliminated[redindex] = roundnum
             elif bluenum > rednum:
-                #print('Red dies!')
+                #print 'Red dies!'
                 del unused[redindex]
+                eliminated[redindex] = roundnum
                 blue.hp -= bluenum
                 blue.history.append(bluenum)
                 if blue.hp > 0:
@@ -142,16 +152,19 @@ def tournament(bracket):
                     del unused[blueindex]
                 else:
                     del unused[blueindex]
+                    eliminated[blueindex] = roundnum
             else: #if you're still tied at this point, both die
-                #print('Both die!')
+                #print 'Both die!'
                 del unused[redindex]
                 del unused[blueindex]
+                eliminated[redindex] = roundnum
+                eliminated[blueindex] = roundnum
     if unused:
-        return list(unused.keys())[0], False
+        return list(unused.keys())[0], False, eliminated
     elif used:
-        return list(used.keys())[0], False
+        return list(used.keys())[0], False, eliminated
     else:
-        return [redindex, blueindex], True
+        return [redindex, blueindex], True, eliminated
         
                 
 def last(hp, history, ties, alive, start):
@@ -273,12 +286,26 @@ def BoundedRandomBot(hp, history, ties, alive, start):
 
 
 def spitballBot(hp, history, ties, alive, start):
-    base = ((hp-1) / (alive-1)) + 1.5 * ties
+    # Spitball a good guess
+    roundsLeft = np.ceil(np.log2(alive)) # Thanks @Heiteira!
+    divFactor = roundsLeft**.8
+    base = ((hp-1) / divFactor) + 1.5 * ties
     value = np.floor(base)
 
-    if value < 10:
-        value = 10
+    # Don't bid under 20
+    if value < 20:
+        value = 20 # Thanks @KBriggs!
 
+    # Don't bet over the opponent's HP
+    # (It's not necessary)
+    opponentHp = 100
+    for h in history:
+        opponentHp -= h
+
+    if value > opponentHp:
+        value = opponentHp
+
+    # Always bet less than your current HP
     if value >= hp:
         value = hp-1
 
@@ -330,34 +357,31 @@ def anti_gangbot(hp, history, ties, alive, start):
         return n
 
 def gang_bot(hp,history,ties,alive,start):
-
-    tieBreak = 0
-    if ties:
-        tieBreak = np.random.randint(1,3)
-        return tieBreak
+    mult=3
     gang = False
     if history:
             count = 0
             for bid in history:
-                    if bid % 7 == 0:
+                    if bid % mult == 0:
                             count += 1
-            if count > 1 or (len(history)==1 and count == 1):
+            if count == len(history):
                     gang = True
     if gang and hp<100:#Both bots need to have a history for a handshake
             if hp > 100-sum(history):
-                    return np.random.randint(0,int(hp/5) or 1)
+                    a=np.random.randint(0,hp/9+1)
             elif hp == 100-sum(history):
-                    return np.random.randint(0,int(hp/10) or 1)
+                    a=np.random.randint(0,hp/18+1)
             else:
                     return 1
+            return a*mult
     elif gang:
-            fS = (100-sum(history))/7
-            return (fS+1)*7
+            fS = (100-sum(history))/mult
+            return (fS+1)*mult
     else:
-            fP = hp/7
-            answer = fP*7
+            fP = hp/mult
+            answer = fP*mult
+            opp_hp = 100-sum(history)
             if history:
-                    opp_hp = 100-sum(history)
                     if len(history)>1:
                             opp_at_1 = 100-history[0]
                             ratio = 1.0*history[1]/opp_at_1
@@ -365,13 +389,20 @@ def gang_bot(hp,history,ties,alive,start):
                             answer = np.ceil(guessedBet)+1
                     else:
                             if 1.0*hp/opp_hp>1:
-                                    fS = opp_hp/7
-                                    answer = fS*7
-            if answer > hp or alive == 2:
-                    answer = hp-1
-            if answer == 0:
-                    floorSeven = hp/7
-                    answer = floorSeven*7-7
+                                    fS = opp_hp/mult
+                                    answer = fS*mult
+            else:
+                    fS = hp/(2*mult)
+                    answer = fS*mult+mult*2 +np.random.randint(-1,1)*3
+            if answer > hp or alive == 2 or answer < 0:
+                    if alive == 2 and hp<opp_hp:
+                      answer = hp
+                    else:
+                      answer = hp-1
+            if hp > 1.5*opp_hp:
+                    return opp_hp + ties
+            if ties:
+              answer += np.random.randint(2)*3
             return answer
 
 def guess_bot(hp, history, ties, alive, start):
@@ -456,23 +487,6 @@ def kick(hp, history, ties, alive, start):
 def binaryBot(hp, history, ties, alive, start):
     return int(np.floor(hp/2)) or 1
 
-def sarcomaBot(hp, history, ties, alive, start):
-    if alive == 2:
-        return hp - 1
-    if not history:
-        startBid = hp / 2
-        maxAdditionalBid = np.round(hp * 0.25) if hp * 0.25 > 2 else 2
-        additionalBid = np.random.randint(1, maxAdditionalBid)
-        return int(startBid + additionalBid + ties)
-    opponentHealth = 100 - sum(history)
-    if opponentHealth < hp:
-        return opponentHealth + ties
-    minimum = np.round(hp * 0.55)
-    maximum = hp - 1 or 1
-    return np.random.randint(minimum, maximum) if minimum < maximum else 1
-
-
-
 def sarcomaBotMkTwo(hp, history, ties, alive, start):
     if inspect.stack()[1][3] != 'guess':
         return hp
@@ -490,81 +504,6 @@ def sarcomaBotMkTwo(hp, history, ties, alive, start):
     maximum = hp - 1 or 1
     return np.random.randint(minimum, maximum) if minimum < maximum else 1
 
-def sarcomaBotMkThree(hp, history, ties, alive, start):
-    if inspect.stack()[1][3] != 'guess':
-        return hp
-    if alive == 2:
-        return hp - 1
-    if not history:
-        startBid = hp / 2
-        maxAdditionalBid = np.round(hp * 0.06) if hp * 0.06 > 2 else 2
-        additionalBid = np.random.randint(1, maxAdditionalBid)
-        return int(startBid + additionalBid + ties)
-    opponentHealth = 100 - sum(history)
-    if opponentHealth < hp:
-        return opponentHealth + ties
-    minimum = np.round(hp * 0.55)
-    maximum = np.round(hp * 0.70) or 1
-    return np.random.randint(minimum, maximum) if minimum < maximum else 1
-
-def sarcomaBotMkFour(hp, history, ties, alive, start):
-    if inspect.stack()[1][3] != 'guess':
-        return hp
-    if alive == 2:
-        return hp - 1
-    if not history:
-        startBid = hp / 2
-        maxAdditionalBid = np.round(hp * 0.08) if hp * 0.08 > 2 else 2
-        additionalBid = np.random.randint(1, maxAdditionalBid)
-        return int(startBid + additionalBid + ties)
-    opponentHealth = 100 - sum(history)
-    if opponentHealth < hp:
-        return opponentHealth + ties
-    minimum = np.round(hp * 0.55)
-    maximum = np.round(hp * 0.80) or 1
-    return np.random.randint(minimum, maximum) if minimum < maximum else 1
-
-def sarcomaBotMkFive(hp, history, ties, alive, start):
-    if inspect.stack()[1][3] != 'guess':
-        return hp
-    if alive == 2:
-        return hp - 1
-    if not history:
-        startBid = hp / 2
-        maxAdditionalBid = np.round(hp * 0.07) if hp * 0.07 > 3 else 3
-        additionalBid = np.random.randint(1, maxAdditionalBid)
-        return int(startBid + additionalBid + ties)
-    opponentHealth = 100 - sum(history)
-    if opponentHealth < hp:
-        return opponentHealth + ties
-    minimum = np.round(hp * 0.54)
-    maximum = np.round(hp * 0.68) or 1
-    return np.random.randint(minimum, maximum) if minimum < maximum else 1
-
-def sarcomaBotMkSix(hp, history, ties, alive, start):
-    if inspect.stack()[1][3] != 'guess':
-        return hp
-    if alive == 2:
-        return hp - 1
-    if not history:
-        startBid = hp / 2
-        maxAdditionalBid = np.round(hp * 0.06) if hp * 0.06 > 3 else 3
-        additionalBid = np.random.randint(2, maxAdditionalBid)
-        return int(startBid + additionalBid + ties)
-    opponentHealth = 100 - sum(history)
-    if opponentHealth < hp:
-        return opponentHealth + ties
-    minimum = np.round(hp * 0.55)
-    maximum = np.round(hp * 0.70) or 1
-    return np.random.randint(minimum, maximum) if minimum < maximum else 1
-
-def kickBox(hp, history, ties, alive, start):
-    if inspect.stack()[1][3] != 'guess':
-        return hp
-    if alive == 2:
-        return hp - 1
-    if alive == 2:
-        return hp / 2 + 3
 
 def TENacious_bot(hp, history, ties, alive, start):
     max_amount=hp-(alive-1)*2;
@@ -576,22 +515,6 @@ def TENacious_bot(hp, history, ties, alive, start):
     if ties==2: return np.minimum(40, max_amount)
     # prevent function blowup
     return 2
-
-def deterministicBot(hp, history, ties, alive, start):
-    if alive == 2:
-        return (hp - 1 + ties)
-    if hp == 100:
-        return 55
-    if hp == 45:
-        return 25
-    if hp == 20:
-        return 12
-    if hp == 8:
-        return 5
-    if hp == 3:
-        return 2
-    else:
-        return hp
 
 def SurvivalistBot(hp, history, ties, alive, start):    
 
@@ -771,7 +694,6 @@ def BoxBot(hp, history, ties, alive, start):
         return hp - 1
     else:
         return RandomOutbid
-
 def UpYoursBot(hp, history, ties, alive, start):
     willToLive = True# if "I" is in "VICTORY"
 
@@ -798,6 +720,22 @@ def UpYoursBot(hp, history, ties, alive, start):
     if not willToLive:
         # Peculate KamikazeBot
         return kamikaze(*args) + 1
+
+def deterministicBot(hp, history, ties, alive, start):
+    if alive == 2:
+        return (hp - 1 + ties)
+    if hp == 100:
+        return 52
+    if hp == 48:
+        return 26
+    if hp == 22:
+        return 13
+    if hp == 9:
+        return 6
+    if hp == 3:
+        return 2
+    else:
+        return hp
 
 
 def aggresiveCalculatingBot(hp, history, ties, alive, start):
@@ -828,6 +766,127 @@ def aggresiveCalculatingBot(hp, history, ties, alive, start):
     # want to save something for the future
     actualBet = min(theoreticalBet + additionalRandomness + ties, hp - 2)
     return int(actualBet)
+
+def sarcomaBot(hp, history, ties, alive, start):
+    if inspect.stack()[1][3] != 'guess':
+        return hp
+    if alive == 2:
+        return hp - 1
+    if not history:
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.25) if hp * 0.25 > 2 else 2
+        additionalBid = np.random.randint(1, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp:
+        return opponentHealth + ties
+    minimum = np.round(hp * 0.75)
+    maximum = hp - 1 or 1
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
+def sarcomaBotMkThree(hp, history, ties, alive, start):
+    if inspect.stack()[1][3] != 'guess':
+        return hp
+    if alive == 2:
+        return hp - 1
+    if not history:
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.08) if hp * 0.08 > 2 else 2
+        additionalBid = np.random.randint(1, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp:
+        return opponentHealth + ties
+    minimum = np.round(hp * 0.6)
+    maximum = hp - 1 or 1
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
+def sarcomaBotMkFour(hp, history, ties, alive, start):
+    if inspect.stack()[1][3] != 'guess' and inspect.stack()[1] == 5:
+        return hp
+    if alive == 2:
+        return hp - 1
+    if not history:
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.08) if hp * 0.08 > 2 else 2
+        additionalBid = np.random.randint(1, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp:
+        return opponentHealth + ties
+    minimum = np.round(hp * 0.55)
+    maximum = np.round(hp * 0.80) or 1
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
+def sarcomaBotMkFive(hp, history, ties, alive, start):
+    if inspect.stack()[1][3] != 'guess' and inspect.stack()[1] == 5:
+        return hp
+    if alive == 2:
+        return hp - 1
+    if not history:
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.07) if hp * 0.07 > 3 else 3
+        additionalBid = np.random.randint(1, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp:
+        return opponentHealth + ties
+    minimum = np.round(hp * 0.54)
+    maximum = np.round(hp * 0.68) or 1
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
+def sarcomaBotMkSix(hp, history, ties, alive, start):
+    if inspect.stack()[1][3] != 'guess' and inspect.stack()[1] == 5:
+        return hp
+    if alive == 2:
+        return hp - 1
+    if not history:
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.06) if hp * 0.06 > 3 else 3
+        additionalBid = np.random.randint(2, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp:
+        return opponentHealth + ties
+    minimum = np.round(hp * 0.55)
+    maximum = np.round(hp * 0.70) or 1
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
+def antiantiupyoursbot(hp, history, ties, alive, start):
+  def guess(hp, history, ties, alive, start):
+    if not history:
+      return (hp / 2) + 3
+    return sarcomaBotMkSix(hp, history, ties, alive, start)
+  return min(guess(hp, history, ties, alive, start), hp)
+
+def classybot(hp, history, ties, alive, start):
+  class cheekyvalue:
+    def __init__(self, value = 100):
+      self.value = value
+    def __cmp__(self, other):
+      return False
+    def __int__(self):
+      return self.value
+  if alive == 2:
+      return cheekyvalue(100)
+  opp_hp = 100 - sum(history)
+  spend = 30 + np.random.randint(0, 21)
+  if history:
+    spend = min(spend, history[-1] + np.random.randint(0, 5))
+  return min(spend, opp_hp, hp)
+
+
+def generic_bot(hp, history, ties, alive, start):
+    if alive == 2:
+        return hp - 1
+    if not history:
+        return int(hp * 7.0 / 13)
+    opp = 100 - sum(history)
+    if opp < hp:
+        return opp + ties
+    max_sac = np.maximum(int(hp * 0.7), 1)
+    rate = history[-1] * 1.0 / (history[-1] + opp)
+    return int(np.minimum(max_sac, rate * opp + 1))
 
 
 if __name__=='__main__':
