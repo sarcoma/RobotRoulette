@@ -4,7 +4,7 @@ import random
 
 import numpy as np
 
-__version__ = '0.3'
+__version__ = '0.4'
 
 
 class RouletteBot:
@@ -15,7 +15,12 @@ class RouletteBot:
 
     def guess(self, e_history, ties, alive, start):
         num = self.func(self.hp, e_history, ties, alive, start)
-        if num > self.hp or num < 0:
+        try:
+            num = int(num)
+        except TypeError:
+            num = 0
+
+        if num > self.hp or num < 0 or not type(num) == type(0):
             num = 0
         return num
 
@@ -48,11 +53,12 @@ def reset_bracket():
     # bracket['SarcomaBotMk4'] = RouletteBot(sarcomaBotMkFour)
     # bracket['SarcomaBotMk5'] = RouletteBot(sarcomaBotMkFive)
     # bracket['SarcomaBotMk6'] = RouletteBot(sarcomaBotMkSix)
-    bracket['SarcomaBotMk7_1'] = RouletteBot(sarcomaBotMkSeven)
-    # bracket['SarcomaBotMk7_2'] = RouletteBot(sarcomaBotMkSeven)
-    # bracket['SarcomaBotMk7_3'] = RouletteBot(sarcomaBotMkSeven)
-    bracket['SarcomaBotMk8'] = RouletteBot(sarcomaBotMkEight)
-    bracket['SarcomaBotMk9'] = RouletteBot(sarcomaBotMkNine)
+    # bracket['SarcomaBotMk7'] = RouletteBot(sarcoma_bot_mk_seven)
+    # bracket['SarcomaBotMk8'] = RouletteBot(sarcoma_bot_mk_eight)
+    # bracket['SarcomaBotMk9'] = RouletteBot(sarcoma_bot_mk_nine)
+    bracket['SarcomaBotMk10'] = RouletteBot(sarcoma_bot_mk_ten)
+    bracket['SarcomaBotMk11'] = RouletteBot(sarcoma_bot_mk_eleven)
+    bracket['SarcomaBotMk12'] = RouletteBot(sarcoma_bot_mk_twelve)
     bracket['TENaciousBot'] = RouletteBot(TENacious_bot)
     bracket['SurvivalistBot'] = RouletteBot(SurvivalistBot)
     bracket['HalvsiestBot'] = RouletteBot(HalvsiesBot)
@@ -65,11 +71,18 @@ def reset_bracket():
     bracket['GenericBot'] = RouletteBot(generic_bot)
     bracket['ClassyBot'] = RouletteBot(classybot)
     bracket['CoastBotV2'] = RouletteBot(coastV2)
-    bracket['CoastBot'] = RouletteBot(coast)
     bracket['MehBot'] = RouletteBot(meh_bot)
-    bracket['MehBot20'] = RouletteBot(meh_bot20)
+    bracket['Meh20Bot'] = RouletteBot(meh_bot20)
+    bracket['MehRanBot'] = RouletteBot(meh_ran)
     bracket['Bot13'] = RouletteBot(bot13)
     bracket['CautiousBot'] = RouletteBot(cautious_gambler)
+    bracket['PercentBot'] = RouletteBot(percent)
+    bracket['HalflifeS3Bot'] = RouletteBot(HalflifeS3)
+    bracket['BloodBot'] = RouletteBot(blood_bot)
+    bracket['MeanKickBot'] = RouletteBot(mean_kick)
+    bracket['PolyBot'] = RouletteBot(polybot)
+    bracket['ThreeQuarterBot'] = RouletteBot(ThreeQuarterBot)
+    # bracket['MataHariBot'] = RouletteBot(MataHariBot)
     return bracket
 
 
@@ -85,7 +98,7 @@ def main():
     rounds = int(np.ceil(np.log2(len(bracket))))
     round_eliminated = {key: np.zeros(rounds, dtype=np.int64) for key in list(bracket.keys())}
     score = {key: [0, 0] for key in list(bracket.keys())}
-    N = 10000
+    N = 100000
     for n in range(N):
         if n % 1000 == 0:
             print n
@@ -112,7 +125,6 @@ def main():
                                                               100 * (score[key][1] / float(N)),
                                                               np.around(round_eliminated[key] / float(N) * 100,
                                                                         0).astype(np.int64))
-
 
 def tournament(bracket):
     unused = bracket
@@ -444,27 +456,29 @@ def gang_bot(hp, history, ties, alive, start):
 
 
 def guess_bot(hp, history, ties, alive, start):
+    enemy_hp = 100 - sum(history)
     if len(history) == 1:
         if history[0] == 99:
             return 2
-        if hp > ((history[0] / 2) + 1):
-            return ((history[0] / 2) + 1)
         else:
-            return ((hp / 2) + 2)
+            return 26 + ties * 2
+
     elif len(history) > 1:
         next_bet_guess = sum(history) // (len(history) ** 2)
         if alive == 2:
-            return hp - 1
+            return hp
         elif alive > 2:
             if hp > next_bet_guess + 1:
-                return (next_bet_guess + 1)
+                return (next_bet_guess + 1 + ties * 2)
             else:
                 return (hp - 1)
 
     else:
-        # Trying to beat the half betters, won't beat the big guys
-        # that bet by 2/3s hp
-        return ((hp / 2) + 1)
+        # Thank you Sarcoma bot. See you in Valhalla.
+        startBid = hp / 3
+        maxAdditionalBid = np.round(hp * 0.06) if hp * 0.06 > 3 else 3
+        additionalBid = np.random.randint(2, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
 
 
 def calculatingBot(hp, history, ties, alive, start):
@@ -504,7 +518,7 @@ def tatbot(hp, history, ties, alive, start):
     if alive == 2:
         return hp - 1
     opp_hp = 100 - sum(history)
-    spend = 30 + np.random.randint(0, 21)
+    spend = 40 + np.random.randint(0, 11)
     if history:
         spend = min(spend, history[-1] + np.random.randint(0, 5))
     return min(spend, opp_hp, hp)
@@ -751,6 +765,7 @@ def UpYoursBot(hp, history, ties, alive, start):
         # Peculate KamikazeBot
         return kamikaze(*args) + 1
 
+
 def sarcomaBot(hp, history, ties, alive, start):
     if inspect.stack()[1][3] != 'guess' and inspect.stack()[1] == 5:
         return hp
@@ -766,8 +781,8 @@ def sarcomaBot(hp, history, ties, alive, start):
         return opponentHealth + ties
     minimum = int(np.round(hp * 0.75))
     maximum = int(hp - 1) or 1
-    print(minimum, maximum)
     return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
 
 def sarcomaBotMkTwo(hp, history, ties, alive, start):
     if alive == 2:
@@ -784,6 +799,7 @@ def sarcomaBotMkTwo(hp, history, ties, alive, start):
     maximum = int(hp - 1) or 1
     return np.random.randint(minimum, maximum) if minimum < maximum else 1
 
+
 def sarcomaBotMkThree(hp, history, ties, alive, start):
     if inspect.stack()[1][3] != 'guess' and inspect.stack()[1] == 5:
         return hp
@@ -799,8 +815,8 @@ def sarcomaBotMkThree(hp, history, ties, alive, start):
         return opponentHealth + ties
     minimum = int(np.round(hp * 0.6))
     maximum = int(hp - 1) or 1
-    print(minimum, maximum)
     return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
 
 def sarcomaBotMkFour(hp, history, ties, alive, start):
     if alive == 2:
@@ -816,6 +832,7 @@ def sarcomaBotMkFour(hp, history, ties, alive, start):
     minimum = int(np.round(hp * 0.55))
     maximum = int(np.round(hp * 0.80)) or 1
     return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
 
 def sarcomaBotMkFive(hp, history, ties, alive, start):
     if alive == 2:
@@ -885,56 +902,135 @@ def aggresiveCalculatingBot(hp, history, ties, alive, start):
 def sarcomaBotMkSix(hp, history, ties, alive, start):
     return hp
 
-def sarcomaBotMkSeven(hp, history, ties, alive, start):
+def sarcoma_bot_mk_seven(hp, history, ties, alive, start):
     if alive == 2:
-        return hp - 1
+        return hp - 1 + ties
+    tie_breaker = (ties * ties) + 1 if ties else ties
     if not history:
-        return 30 + ties
-    opponentHealth = 100 - sum(history)
-    if opponentHealth < hp * 0.50:
-        return opponentHealth + ties
-    minimum = np.round(hp * 0.54)
-    maximum = np.round(hp * 0.58) or 1
-    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+        return 35 + tie_breaker
+    opponent_hp = 100 - sum(history)
+    if opponent_hp < hp * 0.50:
+        return opponent_hp + ties
+    minimum = np.round(hp * 0.55)
+    maximum = np.round(hp * 0.60) or 1
+    return np.random.randint(minimum, maximum) + tie_breaker if minimum < maximum else 1
 
-
-def sarcomaBotMkEight(hp, history, ties, alive, start):
+def sarcoma_bot_mk_eight(hp, history, ties, alive, start):
     if alive == 2:
-        return hp - 1
+        return hp - 1 + ties
+    tie_breaker = (ties * ties) + 1 if ties else ties
     if not history:
-        return 30 + np.random.randint(0, 2) + ties
-    opponentHealth = 100 - sum(history)
-    if opponentHealth < hp * 0.50:
-        return opponentHealth + ties
-    minimum = np.round(hp * 0.54)
-    maximum = np.round(hp * 0.58) or 1
-    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+        return 34 + np.random.randint(0, 2) + tie_breaker
+    opponent_hp = 100 - sum(history)
+    if opponent_hp < hp * 0.50:
+        return opponent_hp + ties
+    minimum = np.round(hp * 0.55)
+    maximum = np.round(hp * 0.60) or 1
+    return np.random.randint(minimum, maximum) + tie_breaker if minimum < maximum else 1
 
 
-def sarcomaBotMkNine(hp, history, ties, alive, start):
+def sarcoma_bot_mk_nine(hp, history, ties, alive, start):
     if alive == 2:
-        return hp - 1
+        return hp - 1 + ties
+    tie_breaker = (ties * ties) + 1 if ties else ties
     if not history:
-        return 30 + np.random.randint(0, 4) + ties
-    opponentHealth = 100 - sum(history)
-    if opponentHealth < hp * 0.50:
-        return opponentHealth + ties
-    minimum = np.round(hp * 0.54)
-    maximum = np.round(hp * 0.58) or 1
-    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+        return 32 + np.random.randint(0, 4) + tie_breaker
+    opponent_hp = 100 - sum(history)
+    if opponent_hp < hp * 0.50:
+        return opponent_hp + ties
+    minimum = np.round(hp * 0.55)
+    maximum = np.round(hp * 0.60) or 1
+    return np.random.randint(minimum, maximum) + tie_breaker if minimum < maximum else 1
 
+
+def sarcoma_bot_mk_ten(hp, history, ties, alive, start):
+    def bid_between(low, high, hp, tie_breaker):
+        minimum = np.round(hp * low)
+        maximum = np.round(hp * high) or 1
+        return np.random.randint(minimum, maximum) + tie_breaker if minimum < maximum else 1
+
+    if alive == 2:
+        return hp - 1 + ties
+    current_round = len(history) + 1
+    tie_breaker = (ties * ties) + 1 if ties else ties
+    if current_round == 1:
+        return 39 + tie_breaker
+    opponent_hp = 100 - sum(history)
+    if opponent_hp < hp * 0.50:
+        return opponent_hp + ties
+    if current_round == 2:
+        return bid_between(0.45, 0.50, hp, tie_breaker)
+    if current_round == 3:
+        return bid_between(0.50, 0.55, hp, tie_breaker)
+    if current_round == 4:
+        return bid_between(0.55, 0.60, hp, tie_breaker)
+    if current_round == 5:
+        bid_between(0.60, 0.65, hp, tie_breaker)
+    return hp - 1 + ties
+
+
+def sarcoma_bot_mk_eleven(hp, history, ties, alive, start):
+    def bid_between(low, high, hp, tie_breaker):
+        minimum = np.round(hp * low)
+        maximum = np.round(hp * high) or 1
+        return np.random.randint(minimum, maximum) + tie_breaker if minimum < maximum else 1
+
+    if alive == 2:
+        return hp - 1 + ties
+    current_round = len(history) + 1
+    tie_breaker = (ties * ties) + 1 if ties else ties
+    if current_round == 1:
+        return 40 + tie_breaker
+    opponent_hp = 100 - sum(history)
+    if opponent_hp < hp * 0.50:
+        return opponent_hp + ties
+    if current_round == 2:
+        return bid_between(0.45, 0.50, hp, tie_breaker)
+    if current_round == 3:
+        return bid_between(0.50, 0.55, hp, tie_breaker)
+    if current_round == 4:
+        return bid_between(0.55, 0.60, hp, tie_breaker)
+    if current_round == 5:
+        bid_between(0.60, 0.65, hp, tie_breaker)
+    return hp - 1 + ties
+
+
+def sarcoma_bot_mk_twelve(hp, history, ties, alive, start):
+    def bid_between(low, high, hp, tie_breaker):
+        minimum = np.round(hp * low)
+        maximum = np.round(hp * high) or 1
+        return np.random.randint(minimum, maximum) + tie_breaker if minimum < maximum else 1
+
+    if alive == 2:
+        return hp - 1 + ties
+    current_round = len(history) + 1
+    tie_breaker = (ties * ties) + 1 if ties else ties
+    if current_round == 1:
+        return 41 + tie_breaker
+    opponent_hp = 100 - sum(history)
+    if opponent_hp < hp * 0.50:
+        return opponent_hp + ties
+    if current_round == 2:
+        return bid_between(0.45, 0.50, hp, tie_breaker)
+    if current_round == 3:
+        return bid_between(0.50, 0.55, hp, tie_breaker)
+    if current_round == 4:
+        return bid_between(0.55, 0.60, hp, tie_breaker)
+    if current_round == 5:
+        bid_between(0.60, 0.65, hp, tie_breaker)
+    return hp - 1 + ties
 
 def antiantiantiantiupyoursbot(hp, history, ties, alive, start):
     def stuck():
-        return (0, ['Whoops!', 'I', 'accidentally', 'replaced', 'your', 'code!'])
+        return [0, ('Whoops!', 'I', 'accidentally', 'replaced', 'your', 'code!')]
 
     def stick():
-        return (0, ["Line", "number", 16, "guess", "it's", "faked :)"])
+        return [0, ("Line", "number", 16, "guess", "it's", "faked :)")]
 
     inspect.stack = stick
     spend = min(sarcomaBotMkSix(hp, history, ties, alive, start), hp)
     if not history:
-        spend = 20 + np.random.randint(0, 10)
+        spend = 40 + np.random.randint(0, 10)
     inspect.stack = stuck
     return spend
 
@@ -1060,10 +1156,11 @@ def cautious_gambler(hp, history, ties, alive, start):
 
 def meh_bot(hp, history, ties, alive, start):
     # Attempt one      MehBot         | 0.020 | 1.6%    | 0.8%    | [34 36 12 10  6  1]%
+    # Attempt two      MehBot         | 0.106 | 10.1%   | 0.8%    | [60  6  7  8  8  2]%
     point = hp / 2 + 3
 
     if ties > 1:
-        ties + 1
+        ties += 1
 
     # Go all out on last round
     if alive == 2:
@@ -1075,7 +1172,7 @@ def meh_bot(hp, history, ties, alive, start):
         return 1
     elif not history:
         # Start with 30, This will increase the chance of dying first round but hopefully better fighting chance after
-        return 30
+        return 30 + ties
     elif point > opponent_hp:
         # Never use more points then needed to win
         return opponent_hp + ties
@@ -1096,6 +1193,278 @@ def bot13(hp, history, ties, alive, start):
         return win
     # print "Don't try too hard"
     return 13 + ties
+
+
+def sarcomaBotMkNine(hp, history, ties, alive, start):
+    if alive == 2:
+        return hp - 1
+    if not history:
+        return 30 + np.random.randint(0, 4) + ties
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp * 0.50:
+        return opponentHealth + ties
+    minimum = np.round(hp * 0.54)
+    maximum = np.round(hp * 0.58) or 1
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
+
+def sarcomaBotMkEight(hp, history, ties, alive, start):
+    if alive == 2:
+        return hp - 1
+    if not history:
+        return 30 + np.random.randint(0, 2) + ties
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp * 0.50:
+        return opponentHealth + ties
+    minimum = np.round(hp * 0.54)
+    maximum = np.round(hp * 0.58) or 1
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
+
+def percent(hp, history, ties, alive, start):
+    if len(history) == 0:
+        # First round, roundon low bid
+        return int(random.randint(10, 33))
+    elif alive == 2:
+        # Last round, go all out
+        return int(hp - 1 + ties)
+    else:
+        # Try and calculate the opponents next bid by seeing what % of their hp they bid each round
+        percents = []
+        for i in range(0, len(history)):
+            hp_that_round = 100 - sum(history[:i])
+            hp_spent_that_round = history[i]
+            percent_spent_that_round = 100.0 * (float(hp_spent_that_round) / float(hp_that_round))
+            percents.append(percent_spent_that_round)
+
+        # We guess that our opponents next bid will be the same % of their current hp as usual, so we bid 1 higher.
+        mean_percent_spend = sum(percents) / len(percents)
+        op_hp_now = 100 - sum(history)
+        op_next_bid = (mean_percent_spend / 100) * op_hp_now
+        our_bid = op_next_bid + 1
+
+        # print mean_percent_spend
+        # print op_hp_now
+        # print op_next_bid
+
+        # If our opponent is weaker than our predicted bid, just bid their hp + ties
+        if op_hp_now < our_bid:
+            return int(op_hp_now + ties)
+        elif our_bid >= hp:
+            # If our bid would kill us, we're doomed, throw a hail mary
+            return int(random.randint(1, hp))
+        else:
+            return int(our_bid + ties)
+
+
+def meh_ran(hp, history, ties, alive, start):
+    # Attempt one      MehBot         | 0.020 | 1.6%    | 0.8%    | [34 36 12 10  6  1]%
+    # Attempt two      MehBot         | 0.106 | 10.1%   | 0.8%    | [60  6  7  8  8  2]%
+    # Attempt three    MehBot         | 0.095 | 9.1 %   | 0.7 %   | [70  3  5  6  6  0]%
+    point = hp / 2 + 3
+    if ties > 1:
+        ties += 1
+    # Go all out on last round
+    if alive == 2:
+        return hp - 1
+    opponent_hp = 100 - sum(history)
+    if hp < 3:
+        return 1
+    elif not history:
+        # randome number between 33
+        return random.randint(33, 45)
+    elif point > opponent_hp:
+        # Never use more points then needed to win
+        return opponent_hp + ties
+    elif point >= hp:
+        return hp - 1
+    else:
+        return point
+
+
+def meh_bot20(hp, history, ties, alive, start):
+    # Attempt one      MehBot         | 0.020 | 1.6%    | 0.8%    | [34 36 12 10  6  1]%
+    # Attempt two      MehBot         | 0.106 | 10.1%   | 0.8%    | [60  6  7  8  8  2]%
+    point = hp / 2 + 2
+
+    if ties > 1:
+        ties += 1
+
+    # Go all out on last round
+    if alive == 2:
+        return hp - 1
+
+    opponent_hp = 100 - sum(history)
+
+    if hp < 3:
+        return 1
+    elif not history:
+        # Start with 35, This will increase the chance of dying first round but hopefully better fighting chance after
+        return 35 + ties
+    elif point > opponent_hp:
+        # Never use more points then needed to win
+        return opponent_hp + ties
+    elif point >= hp:
+        return hp - 1
+    else:
+        return point
+
+
+def HalflifeS3(hp, history, ties, alive, start):
+    ''' Bet a half of oponent life + 2 '''
+    if history:
+        op_HP = 100 - sum(history)
+        return np.minimum(hp - 1, np.around(op_HP / 2) + 2 + np.floor(1.5 * ties))
+    else:
+        return hp / 3
+
+
+def blood_bot(hp, history, ties, alive, start):
+    enemy_hp = 100 - sum(history)
+    if history:
+        if len(history) == 1:
+            if history[0] == 99:
+                return 2
+
+        if alive == 2:
+            return hp
+
+        if enemy_hp <= 5:
+            return enemy_hp - 2 + ties * 2
+
+        if enemy_hp <= 10:
+            return enemy_hp - 5 + ties * 2
+
+        if (hp - enemy_hp) > 50:
+            return (2 * enemy_hp / 3 + ties * 4)
+
+        if (hp - enemy_hp) > 20:
+            return (2 * enemy_hp / 3 + ties * 3)
+
+        if (hp - enemy_hp) < 0:
+            # die gracefully
+            return hp - 1 + ties
+
+    else:
+        startBid = hp / 3
+        maxAdditionalBid = np.round(hp * 0.06) if hp * 0.06 > 3 else 3
+        additionalBid = np.random.randint(2, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
+
+
+def mean_kick(hp, history, ties, alive, start):
+    if alive == 2:
+        return hp - 1
+
+    if not history:
+        return 35
+
+    opp_hp = 100 - sum(history)
+    if opp_hp * 2 <= hp:
+        return opp_hp + ties
+    else:
+        return min(round(opp_hp / 2) + 3 + ties * 2, hp - 1 + (ties > 0))
+
+
+def MataHariBot(hp, history, ties, alive, start):
+    ''' 
+    Interrogate our opponent about what they're going to do
+    and use that against them
+    '''
+
+    if alive <= 3:
+        return hp - 1
+
+    debug = False
+
+    # Hello antiantiantiantiupyoursbot and your inspect.stack modification
+    f = inspect.currentframe()
+    target_frame = None
+    depth = 0
+    while True:
+        f = f.f_back
+        if f is None:
+            break
+        depth = depth + 1
+        if depth == 2:
+            target_frame = f
+
+    if depth != 4 or target_frame is None or target_frame.f_code.co_name != 'tournament':
+        if debug:
+            print('Skullduggery!')
+        return hp - 1
+
+    # Find our opponent
+    opponent = None
+    us = None
+    for key, value in target_frame.f_locals.iteritems():
+        if not isinstance(value, RouletteBot):
+            continue
+        if value.func.__code__.co_name == inspect.currentframe().f_code.co_name:
+            us = value
+        else:
+            opponent = value
+
+    if us is None or opponent is None:
+        if debug:
+            print('Falsity!')
+        return hp - 1
+
+    results = []
+    for i in range(random.randint(100, 151)):
+        result = opponent.func(opponent.hp, us.history, ties, alive, start)
+        # pathetic_attempt_at_analytics_bot sometimes returns None, though
+        # I couldn't figure out why with a quick glance at its code.
+        if result is None:
+            result = 0
+            if debug:
+                print("%s returned None" % (opponent.__code__.co_name))
+        results.append(result)
+
+    # If we have a deterministic result, use that
+    if np.allclose(results, results[0]):
+        guess = results[0]
+    # If we have a small range of guesses, use the maximum
+    elif np.max(results) - np.min(results) <= hp / 3:
+        guess = np.max(results)
+    # Otherwise, we're dealing with a wide range of guesses and can just hope
+    else:
+        guess = np.median(results) * 1.25
+
+    return np.minimum(hp - 1, int(guess) + 1)
+
+
+def polybot(hp, history, ties, alive, start):
+    opp_hp = 100 - sum(history)
+    if alive == 2:
+        return hp - 1
+    round = len(history)
+    spend = 0
+    if round == 0:
+        spend = 35 + np.random.randint(1, 11)
+    elif round == 1:
+        spend = history[0] + np.random.randint(0, 3)
+    else:
+        poly = np.polyfit(xrange(0, round), history, min(round - 1, 2))
+        spend = int(np.polyval(poly, round)) + np.random.randint(1, 4)
+    return min(spend, hp - 1, opp_hp)
+
+
+def ThreeQuarterBot(hp, history, ties, alive, start):
+    threeQuarters = 3 * hp / 4
+
+    if alive == 2:
+        return hp - 1
+
+    opponent_hp = 100 - sum(history)
+
+    if not history:
+        # low-ball the first round but higher than (some) other low-ballers
+        return 32 + ties
+    elif threeQuarters > opponent_hp:
+        return opponent_hp + ties
+
+    return threeQuarters
 
 
 def meh_bot20(hp, history, ties, alive, start):
