@@ -42,7 +42,15 @@ def reset_bracket():
     bracket['TitTatBot'] = RouletteBot(tatbot)
     bracket['SpreaderBot'] = RouletteBot(Spreader)
     bracket['KickBot'] = RouletteBot(kick)
-    bracket['SarcomaBotMk7'] = RouletteBot(sarcomaBotMkSeven)
+    # bracket['SarcomaBot'] = RouletteBot(sarcomaBot)
+    # bracket['SarcomaBotMk2'] = RouletteBot(sarcomaBotMkTwo)
+    # bracket['SarcomaBotMk3'] = RouletteBot(sarcomaBotMkThree)
+    # bracket['SarcomaBotMk4'] = RouletteBot(sarcomaBotMkFour)
+    # bracket['SarcomaBotMk5'] = RouletteBot(sarcomaBotMkFive)
+    # bracket['SarcomaBotMk6'] = RouletteBot(sarcomaBotMkSix)
+    bracket['SarcomaBotMk7_1'] = RouletteBot(sarcomaBotMkSeven)
+    # bracket['SarcomaBotMk7_2'] = RouletteBot(sarcomaBotMkSeven)
+    # bracket['SarcomaBotMk7_3'] = RouletteBot(sarcomaBotMkSeven)
     bracket['SarcomaBotMk8'] = RouletteBot(sarcomaBotMkEight)
     bracket['SarcomaBotMk9'] = RouletteBot(sarcomaBotMkNine)
     bracket['TENaciousBot'] = RouletteBot(TENacious_bot)
@@ -743,18 +751,25 @@ def UpYoursBot(hp, history, ties, alive, start):
         # Peculate KamikazeBot
         return kamikaze(*args) + 1
 
+def sarcomaBot(hp, history, ties, alive, start):
+    if inspect.stack()[1][3] != 'guess' and inspect.stack()[1] == 5:
+        return hp
+    if alive == 2:
+        return hp - 1
+    if not history:
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.25) if hp * 0.25 > 2 else 2
+        additionalBid = np.random.randint(1, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp:
+        return opponentHealth + ties
+    minimum = int(np.round(hp * 0.75))
+    maximum = int(hp - 1) or 1
+    print(minimum, maximum)
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
 
 def sarcomaBotMkTwo(hp, history, ties, alive, start):
-    def isSafe(parentCall):
-        frame, filename, line_number, function_name, lines, index = parentCall
-        if function_name is not 'guess':
-            return False
-        if line_number > 60:
-            return False
-        return True
-
-    if not isSafe(inspect.stack()[1]):
-        return hp
     if alive == 2:
         return hp - 1
     if not history:
@@ -765,8 +780,56 @@ def sarcomaBotMkTwo(hp, history, ties, alive, start):
     opponentHealth = 100 - sum(history)
     if opponentHealth < hp:
         return opponentHealth + ties
-    minimum = np.round(hp * 0.6)
-    maximum = hp - 1 or 1
+    minimum = int(np.round(hp * 0.6))
+    maximum = int(hp - 1) or 1
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
+def sarcomaBotMkThree(hp, history, ties, alive, start):
+    if inspect.stack()[1][3] != 'guess' and inspect.stack()[1] == 5:
+        return hp
+    if alive == 2:
+        return hp - 1
+    if not history:
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.08) if hp * 0.08 > 2 else 2
+        additionalBid = np.random.randint(1, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp:
+        return opponentHealth + ties
+    minimum = int(np.round(hp * 0.6))
+    maximum = int(hp - 1) or 1
+    print(minimum, maximum)
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
+def sarcomaBotMkFour(hp, history, ties, alive, start):
+    if alive == 2:
+        return hp - 1
+    if not history:
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.08) if hp * 0.08 > 2 else 2
+        additionalBid = np.random.randint(1, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp:
+        return opponentHealth + ties
+    minimum = int(np.round(hp * 0.55))
+    maximum = int(np.round(hp * 0.80)) or 1
+    return np.random.randint(minimum, maximum) if minimum < maximum else 1
+
+def sarcomaBotMkFive(hp, history, ties, alive, start):
+    if alive == 2:
+        return hp - 1
+    if not history:
+        startBid = hp / 2
+        maxAdditionalBid = np.round(hp * 0.07) if hp * 0.07 > 3 else 3
+        additionalBid = np.random.randint(1, maxAdditionalBid)
+        return int(startBid + additionalBid + ties)
+    opponentHealth = 100 - sum(history)
+    if opponentHealth < hp:
+        return opponentHealth + ties
+    minimum = np.round(hp * 0.54)
+    maximum = np.round(hp * 0.68) or 1
     return np.random.randint(minimum, maximum) if minimum < maximum else 1
 
 
@@ -819,35 +882,8 @@ def aggresiveCalculatingBot(hp, history, ties, alive, start):
     return int(actualBet)
 
 
-def sarcomaBotMkFour(hp, history, ties, alive, start):
-    def isSafe(parentCall):
-        frame, filename, line_number, function_name, lines, index = parentCall
-        if function_name is not 'guess':
-            return False
-        if line_number > 60:
-            return False
-        return True
-
-    if not isSafe(inspect.stack()[1]):
-        return hp
-    if alive == 2:
-        return hp - 1
-    if not history:
-        startBid = hp / 2
-        maxAdditionalBid = np.round(hp * 0.08) if hp * 0.08 > 2 else 2
-        additionalBid = np.random.randint(1, maxAdditionalBid)
-        return int(startBid + additionalBid + ties)
-    opponentHealth = 100 - sum(history)
-    if opponentHealth < hp:
-        return opponentHealth + ties
-    minimum = np.round(hp * 0.55)
-    maximum = np.round(hp * 0.80) or 1
-    return np.random.randint(minimum, maximum) if minimum < maximum else 1
-
-
 def sarcomaBotMkSix(hp, history, ties, alive, start):
     return hp
-
 
 def sarcomaBotMkSeven(hp, history, ties, alive, start):
     if alive == 2:
@@ -866,9 +902,9 @@ def sarcomaBotMkEight(hp, history, ties, alive, start):
     if alive == 2:
         return hp - 1
     if not history:
-        return 28 + np.random.randint(0, 4) + ties
+        return 30 + np.random.randint(0, 2) + ties
     opponentHealth = 100 - sum(history)
-    if opponentHealth < hp * 0.52:
+    if opponentHealth < hp * 0.50:
         return opponentHealth + ties
     minimum = np.round(hp * 0.54)
     maximum = np.round(hp * 0.58) or 1
@@ -879,9 +915,9 @@ def sarcomaBotMkNine(hp, history, ties, alive, start):
     if alive == 2:
         return hp - 1
     if not history:
-        return 24 + np.random.randint(0, 8) + ties
+        return 30 + np.random.randint(0, 4) + ties
     opponentHealth = 100 - sum(history)
-    if opponentHealth < hp * 0.48:
+    if opponentHealth < hp * 0.50:
         return opponentHealth + ties
     minimum = np.round(hp * 0.54)
     maximum = np.round(hp * 0.58) or 1
