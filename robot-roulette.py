@@ -1,6 +1,7 @@
 import inspect
 import math
 import random
+import types
 
 import numpy as np
 
@@ -55,9 +56,12 @@ def reset_bracket():
     # bracket['SarcomaBotMk7'] = RouletteBot(sarcoma_bot_mk_seven)
     # bracket['SarcomaBotMk8'] = RouletteBot(sarcoma_bot_mk_eight)
     # bracket['SarcomaBotMk9'] = RouletteBot(sarcoma_bot_mk_nine)
-    bracket['SarcomaBotMk10'] = RouletteBot(sarcoma_bot_mk_ten)
+    # bracket['SarcomaBotMk10'] = RouletteBot(sarcoma_bot_mk_ten)
+    # bracket['SarcomaBotMk10-1'] = RouletteBot(sarcoma_bot_mk_ten)
+    # bracket['SarcomaBotMk10-2'] = RouletteBot(sarcoma_bot_mk_ten)
     bracket['SarcomaBotMk11'] = RouletteBot(sarcoma_bot_mk_eleven)
-    bracket['SarcomaBotMk12'] = RouletteBot(sarcoma_bot_mk_twelve)
+    # bracket['SarcomaBotMk12'] = RouletteBot(sarcoma_bot_mk_twelve)
+    # bracket['SarcomaBotMk14'] = RouletteBot(sarcoma_bot_mk_fourteen)
     bracket['TENaciousBot'] = RouletteBot(TENacious_bot)
     bracket['SurvivalistBot'] = RouletteBot(SurvivalistBot)
     bracket['HalvsiestBot'] = RouletteBot(HalvsiesBot)
@@ -82,14 +86,23 @@ def reset_bracket():
     bracket['PolyBot'] = RouletteBot(polybot)
     bracket['ThreeQuarterBot'] = RouletteBot(ThreeQuarterBot)
     bracket['FourSeventhsBot'] = RouletteBot(FourSeventhsBot)
+    bracket['ThePerfectFractionBot'] = RouletteBot(ThePerfectFraction)
     bracket['CautiousGamblerBot2'] = RouletteBot(cautious_gambler2)
     bracket['KickbanBot'] = RouletteBot(kickban)
     bracket['AntiKickBot'] = RouletteBot(antiKickBot)
     bracket['SquareUpBot'] = RouletteBot(squareUp)
     bracket['SnetchBot'] = RouletteBot(snetchBot)
     bracket['BoundedRandomBot'] = RouletteBot(boundedRandomBot)
-    bracket['AggressiveBoundedRandomBot'] = RouletteBot(aggressiveBoundedRandomBot)
-    #bracket['MataHariBot'] = RouletteBot(MataHariBot)
+    bracket['AggressiveBoundedRandomBotV2'] = RouletteBot(aggressiveBoundedRandomBotV2)
+    bracket['OgBot'] = RouletteBot(ogbot)
+    # bracket['BandaidBot'] = RouletteBot(BandaidBot)
+    # bracket['GetAlongBot'] = RouletteBot(GetAlongBot)
+    bracket['SmartBot'] = RouletteBot(smart_bot)
+    bracket['HardCodedBot'] = RouletteBot(hc)
+    bracket['OverfittedBot'] = RouletteBot(OverfittedBot)
+    bracket['MataHari2Bot'] = RouletteBot(MataHari2Bot)
+    bracket['StrikerBot'] = RouletteBot(strikerbot)
+    bracket['WiseKickBot'] = RouletteBot(wise_kick)
     return bracket
 
 
@@ -129,7 +142,7 @@ def main():
     print 'Name\tScore\tWinRate\tTieRate\tElimination Probability'
     for key, val in tscore:
         i += 1
-        print '{5}. {0}\t{1:.3f}\t{2:.1f}%\t{3:.1f}%\t{4}%'.format(key, val/float(N), 100*(score[key][0]/float(N)), 100*(score[key][1]/float(N)), np.around(round_eliminated[key]/float(N)*100,0).astype(np.int64), i)
+        print '{5}. {0}\t{1:.5f}\t{2:.2f}%\t{3:.2f}%\t{4}%'.format(key, val/float(N), 100*(score[key][0]/float(N)), 100*(score[key][1]/float(N)), np.around(round_eliminated[key]/float(N)*100,0).astype(np.int64), i)
 
 def tournament(bracket):
     unused = bracket
@@ -307,12 +320,20 @@ def pathetic_attempt_at_analytics_bot(hp, history, ties, alive, start):
             n = hp - 1
         return n
 
-
-def halfpunch(hp, history, ties, alive, start):
-    if hp > 1:
-        return np.ceil(hp / 2)
+def halfpunch(hp, history, ties, alive, start): #revisited
+    punch = hp - 1
+    if alive == 2:
+        return punch
+    if history:
+        if hp > 1:
+            punch = np.ceil(hp/2.05) + ties + np.floor(ties / 2)
+        else:
+            punch = 1
     else:
-        return 1
+        punch = 42 + ties + np.floor(ties / 2)
+    if punch >= hp:
+        punch = hp - 1
+    return punch
 
 
 def robbie_roulette(hp, history, ties, alive, start):
@@ -953,7 +974,7 @@ def sarcoma_bot_mk_ten(hp, history, ties, alive, start):
     current_round = len(history) + 1
     tie_breaker = ties + 2 if ties else ties
     if current_round == 1:
-        return 39 + tie_breaker
+        return 42 + tie_breaker
     opponent_hp = 100 - sum(history)
     if opponent_hp < hp * 0.50:
         return opponent_hp + ties
@@ -979,12 +1000,12 @@ def sarcoma_bot_mk_eleven(hp, history, ties, alive, start):
     current_round = len(history) + 1
     tie_breaker = ties + 2 if ties else ties
     if current_round == 1:
-        return 38 + tie_breaker
+        return 42 + tie_breaker
     opponent_hp = 100 - sum(history)
     if opponent_hp < hp * 0.50:
         return opponent_hp + ties
     if current_round == 2:
-        return bid_between(0.48, 0.52, hp, tie_breaker)
+        return bid_between(0.45, 0.50, hp, tie_breaker)
     if current_round == 3:
         return bid_between(0.50, 0.55, hp, tie_breaker)
     if current_round == 4:
@@ -1005,14 +1026,45 @@ def sarcoma_bot_mk_twelve(hp, history, ties, alive, start):
     current_round = len(history) + 1
     tie_breaker = ties + 2 if ties else ties
     if current_round == 1:
-        return 37 + tie_breaker
+        return 43 + tie_breaker
     opponent_hp = 100 - sum(history)
     if opponent_hp < hp * 0.50:
         return opponent_hp + ties
     if current_round == 2:
+        return bid_between(0.45, 0.50, hp, tie_breaker)
+    if current_round == 3:
+        return bid_between(0.50, 0.55, hp, tie_breaker)
+    if current_round == 4:
         return bid_between(0.55, 0.60, hp, tie_breaker)
-    if current_round >= 3:
-        return bid_between(0.55, 0.65, hp, tie_breaker)
+    if current_round == 5:
+        return bid_between(0.60, 0.65, hp, tie_breaker)
+    return hp - 1 + ties
+
+
+def sarcoma_bot_mk_fourteen(hp, history, ties, alive, start):
+    def bid_between(low, high, hp, tie_breaker):
+        minimum = np.round(hp * low)
+        maximum = np.round(hp * high) or 1
+        return np.random.randint(minimum, maximum) + tie_breaker if minimum < maximum else 1
+
+    if alive == 2:
+        return hp - 1 + ties
+    current_round = len(history) + 1
+    tie_breaker = ties + 2 if ties else ties
+    if current_round == 1:
+        return 44 + tie_breaker
+    opponent_hp = 100 - sum(history)
+    if opponent_hp < hp * 0.50:
+        return opponent_hp + ties
+    if current_round == 2:
+        return bid_between(0.45, 0.50, hp, tie_breaker)
+    if current_round == 3:
+        return bid_between(0.50, 0.55, hp, tie_breaker)
+    if current_round == 4:
+        return bid_between(0.55, 0.60, hp, tie_breaker)
+    if current_round == 5:
+        return bid_between(0.60, 0.65, hp, tie_breaker)
+    return hp - 1 + ties
 
 def antiantiantiantiupyoursbot(hp, history, ties, alive, start):
     def stuck():
@@ -1374,75 +1426,43 @@ def mean_kick(hp, history, ties, alive, start):
         return min(round(opp_hp / 2) + 3 + ties * 2, hp - 1 + (ties > 0))
 
 
-def MataHariBot(hp, history, ties, alive, start):
-    ''' 
-    Interrogate our opponent about what they're going to do
-    and use that against them
-    '''     
-    if alive <= 3:
-        return hp - 1
+def ogbot(hp, history, ties, alive, start):
+    otherBots = functions = [f for f in globals().values() if type(f) == types.FunctionType]
 
-    debug = False
+    def whatWouldOtherbotDo(bot,hp,history,ties,alive,start):
+        botname = bot.__name__
+        # got to avoid self referencing
+        if(botname)=='ogbot':
+            return -999
 
-    # Hello antiantiantiantiupyoursbot and your inspect.stack modification
-    f = inspect.currentframe()
-    target_frame = None
-    depth = 0
-    while True:
-        f = f.f_back
-        if f is None:
-            break
-        depth = depth + 1
-        if depth == 2:
-            target_frame = f
+        # avoid non bot functions
+        try:
+            return bot(hp,history,ties,alive,start)
+        except (TypeError, NameError, RuntimeError):
+            return -999
 
-    if depth != 7 or target_frame is None or target_frame.f_code.co_name != 'tournament':
-        if debug:
-            print('Skullduggery!')
-            print depth
-            print target_frame
-            print target_frame.f_code.co_name
-        return hp - 1
+    otherBotCurrentBids = []
 
-    # Find our opponent
-    opponent = None
-    us = None
-    for key, value in target_frame.f_locals.iteritems():
-        if not isinstance(value, RouletteBot):
-            continue
-        if value.func.__code__.co_name == inspect.currentframe().f_code.co_name:
-            us = value
-        else:
-            opponent = value
+    otherBotOpeningBids = []
 
-    if us is None or opponent is None:
-        if debug:
-            print('Falsity!')
-        return hp - 1
+    for bot in otherBots:
+        otherBotCurrentBids.append(whatWouldOtherbotDo(bot,hp,history,ties,alive,start))
+        otherBotOpeningBids.append(whatWouldOtherbotDo(bot,100,[],0,start,start))
 
-    results = []
-    for i in range(random.randint(100, 151)):
-        result = opponent.func(opponent.hp, us.history, ties, alive, start)
-        # pathetic_attempt_at_analytics_bot sometimes returns None, though
-        # I couldn't figure out why with a quick glance at its code.
-        if result is None:
-            result = 0
-            if debug:
-                print("%s returned None" % (opponent.__code__.co_name))
-        results.append(result)
+    # remove invalid outputs
+    otherBotCurrentBids = filter(lambda a: a != -999, otherBotCurrentBids)
+    otherBotOpeningBids = filter(lambda a: a != -999, otherBotOpeningBids)
 
-    # If we have a deterministic result, use that
-    if np.allclose(results, results[0]):
-        guess = results[0]
-    # If we have a small range of guesses, use the maximum
-    elif np.max(results) - np.min(results) <= hp / 3:
-        guess = np.max(results)
-    # Otherwise, we're dealing with a wide range of guesses and can just hope
-    else:
-        guess = np.median(results) * 1.25
+    # if this is the second round or later, try to deal with bots who were likely to pass the first round
+    if len(history)>ties:
+        medianOpening = np.median(otherBotOpeningBids)
+        # get the bots who probably passed the first round and aren't committing suicide
+        likelySuccessBots = [(a,b) for a,b in zip(otherBotCurrentBids, otherBotOpeningBids) if (b>medianOpening) & (a<hp)]
+        otherBotCurrentBids = [a for a,b in likelySuccessBots]
 
-    return np.minimum(hp - 1, int(guess) + 1)
 
+    out = min(np.median(otherBotCurrentBids) + 1,hp-1)
+    return out
 
 def polybot(hp, history, ties, alive, start):
   opp_hp = 100 - sum(history)
@@ -1628,7 +1648,7 @@ def boundedRandomBot(hp, history, ties, alive, start):
         bid_ceiling = max_possible_bid
     return np.random.randint(1, bid_ceiling+1)
 
-def aggressiveBoundedRandomBot(hp, history, ties, alive, start):
+def aggressiveBoundedRandomBotV2(hp, history, ties, alive, start):
     max_possible_bid = hp - 1
     if alive == 2 or max_possible_bid == 0:
         return max_possible_bid
@@ -1637,10 +1657,311 @@ def aggressiveBoundedRandomBot(hp, history, ties, alive, start):
         opp_hp = 100 - sum(history)
     else:        
         opp_hp = 100
-    bid_ceiling = min(opp_hp+1, max_possible_bid)
-    bid_floor = min(np.ceil(opp_hp * 0.5), bid_ceiling)
-    return np.random.randint(bid_floor, bid_ceiling+1)
 
+    bid_floor = min(np.ceil(opp_hp * 0.5), max_possible_bid)
+    return np.random.randint(bid_floor, max_possible_bid+1)
+
+##def BandaidBot(hp, history, ties, alive, start):
+##    if alive == 2:
+##        return hp-1
+##
+##    if history:
+##        opp_hp = 100 - sum(history)
+##        opp_last_hp = 100 - sum(history[:-1])
+##
+##        if history[-1] <= opp_last_hp / 3:
+##            return 1 + np.random.randint(0, ties or 1) 
+##        elif history[-1] > opp_last_hp / 2:
+##            return min(opp_hp - 1, hp)
+##        else:
+##            return np.random.randint(history[-1], hp/2)
+##    else:
+##        return np.floor(hp/3)
+
+def GetAlongBot(hp, history, ties, alive, start):
+    if alive == 2:
+        return hp-1
+
+    if history:
+        opp_hp = 100 - sum(history)
+        opp_last_hp = 100 - sum(history[:-1])
+        count = 0
+        for i in range(0, len(history)):
+            hp_that_round = 100 - sum(history[:i])
+            hp_spent_that_round = history[i]
+            if hp_that_round / 3 - 1 <= hp_spent_that_round <= hp_that_round / 2:
+                count += 1
+        if count == len(history): #It's probably BandaidBot!
+            return 2
+        else:
+            return min(opp_hp - 1, np.floor(hp/3))
+    else:
+        return np.floor(hp/3)
+
+
+def smart_bot(hp, history, ties, alive, start):
+    op_high_bid = 0
+    op_hp = 100
+    hptoret = 1
+    his = False
+    tienum = (ties * ties) + 1 if ties else ties
+    if not history:
+        return 42 + tienum
+        #return obots(hp, history, ties, alive, start)
+    if his:
+        if history[0]==36:
+            return min(mean_kick(hp, history, ties, alive, start) + 3, hp-1)
+
+    if alive == 2:
+        if history[0]==36:
+            return max(mean_kick(hp, history, ties, alive, start) + 3, hp-1)
+        return hp - 1
+    if history:
+        his = True
+
+    if his:
+        for h in history:
+            if int(h) > op_high_bid:
+                op_high_bid = h
+    if his:
+        op_hp = 100 - sum(history)
+        if op_hp >= hp:
+            return np.floor(hp / 3)
+
+
+    roundn = len(history) + 1
+    #if roundn > 6:
+        #return hp - 1
+    """Overrideable(If above did not execute of course)"""
+
+    if op_hp < hp:
+        """Kick em hard"""
+        hptoret = mean_kick(hp, history, ties, alive, start)
+    return hptoret
+
+def hc(hp, history, ties, alive, start):
+    plan = [40,27,20,10,2,5,5,5,5,5,2,2,2,2,2,1,1,1,1,1,100,1]
+    ohp = 100 - sum(history)
+    if ohp < hp * 0.16:
+        return ohp + 1
+    x = 100
+    k = 0
+    while x > hp:
+        x -= plan[k]
+        k += 1
+    if plan[k] > ohp:
+        return ohp + 1
+    return plan[k] + ties
+
+def OverfittedBot(hp, history, ties, alive, start):
+    if alive == 2:
+        return hp - 1
+    opponent_hp = 100 - np.sum(history)
+    if opponent_hp == 100:
+        guess = 40 + ties
+    elif len(history) == 1 and history[0] == 39:
+        guess = opponent_hp * 0.50 + 1 + ties
+    else:
+        guess = mean_kick(hp, history, ties, alive, start) + 1
+    return min(guess, hp - 1 + ties, 100 - np.sum(history) + ties)
+
+def MataHari2Bot(hp, history, ties, alive, start):
+    '''
+    Round 1: Determine what our opponents do in the beginning with no information,
+    give the assumed best counter.
+
+    Round 2: Using the information from round 1, determine which of our opponents
+    are possible given their history.  Determine what they'll do with our history
+    (which we know from our hp) and give the assumed best counter.
+
+    Round 3+: Same as round 2, except we have to make up our history based on our
+    hp (not knowing our own history is a really odd decision but w/e), which leads
+    to less and less precision.
+    '''
+
+    this = MataHari2Bot
+    INITIAL_HP = 100
+
+    # It's not that I hate Ogbot, it's that otherwise we get recursion
+    if inspect.currentframe().f_back.f_back.f_code.co_name != 'tournament':
+        return 1
+
+    def simulate(method, hp, history, ties, alive, start):
+        # print("Running simulation for %s when we are %i HP, opponent is %i HP" % (method.__name__, hp, INITIAL_HP - np.sum(history) + 1))
+        return [ method(hp, history, ties, alive, start) for x in range(200) ]
+
+    def best_guess(hp, results):
+        low = np.min(results)
+        high = np.max(results)
+        if high == low or high - low <= 5:
+            guess = high
+        else:
+            guess = np.median(results)
+        if guess is None:
+            return 1
+        return guess
+
+    class BotInfo:
+        def __init__(self, name, method, hp, history, ties, alive, start):
+            self.name = name
+            self.method = method
+            self.round1_simulations = simulate(self.method, hp, history, ties, alive, start)
+            self.round1_guess = best_guess(hp, self.round1_simulations)
+            self.guesses = { }
+
+        def guess(self, hp, history, ties, alive, start):
+            opponent_hp = INITIAL_HP - np.sum(history)
+            key = (hp * 100) + opponent_hp
+            if key not in self.guesses:
+                try:
+                    simulations = simulate(self.method, opponent_hp, [ INITIAL_HP - hp ], ties, alive, start)
+                except ValueError:
+                    # BoundedRandomBot has a problem if you feed it a hp of 1 and a history of 99; this doesn't
+                    # occur normally because it's not actually included in reset_brackets, perhaps by oversight?
+                    # Anyways, ignore it.
+                    # print("Error occurred calling %s with (%i, %s, %i, %i, %i); our hp %i, opponent history %s" % (self.name, opponent_hp, [ INITIAL_HP - hp ], ties, alive, start, hp, history))
+                    if self.name != 'BoundedRandomBot':
+                        raise
+                    simulations = [ 1 ]
+
+                self.guesses[key] = best_guess(hp, simulations)
+            return self.guesses[key]
+
+    if not hasattr(this, 'bots'):
+        # Could've used reset_brackets, but abiding by the rules to not touch RouletteBot even if they're not the ones
+        # being used in the tournament
+        # print("Initializing %s; this should only happen once" % (this.__name__))
+        # We have to skip OgBot or the "Simulate OgBot 200 times" then leads into OgBot calling every other bot and performance just goes
+        # to hell
+        blacklist = [ this.__name__, 'ogbot' ]
+        this.bots = [ ]
+        for key, value in globals().iteritems():
+            if key not in blacklist and type(value) == type(this) and len(inspect.getargspec(value).args) == 5:
+                bot = BotInfo(key, value, hp, history, ties, alive, start)
+                # Ignore the suicide bots.  Even if we beat them in round 1, we'll be down too many hp to win, so they
+                # will just skew our medians pointless
+                # Also ignore the wildly random bots
+                if bot.round1_guess < 70 and (np.max(bot.round1_simulations) - np.min(bot.round1_simulations)) < 40:
+                    this.bots.append(bot)
+
+    # Round1 will always be the same, no need to recalculate every time
+    if len(history) == 0:
+        if hasattr(this, 'round1_guess'):
+            return this.round1_guess + ties
+        guesses = [ bot.round1_guess for bot in this.bots ]
+    else:
+        # Otherwise, determine which bots could have given us the round1 guess we have in history
+        # Weight this; the guess of a bot that deterministically returns this number is worth more
+        # than one that returned it only 5% of the time
+        guesses = [ ]
+        for bot in this.bots:
+            if history[0] in bot.round1_simulations:
+                guess = bot.guess(hp, history, ties, alive, start)
+                guesses.extend( [ guess ] * bot.round1_simulations.count(history[0]))
+
+    if len(guesses) == 0:
+        # yolo
+        guess = mean_kick(hp, history, ties, alive, start) + 1
+    else:
+        guess = int(math.ceil(np.median(guesses))) + 1
+        # As long as it doesn't cost us too much, keep going up.  This catches the various
+        # "do it like Xbot but adding 1" bots
+        while guess in guesses:
+            guess = guess + 1
+    guess = min(guess, hp - 1 + ties, INITIAL_HP - np.sum(history) + ties)
+    if len(history) == 0:
+        this.round1_guess = guess
+        # print("MataHari2Bot's Round1 Guess: %i" % (this.round1_guess))
+        #ordered_bots = sorted(this.bots, key = lambda x: x.round1_guess)
+        #i = 1
+        #for bot in ordered_bots:
+        #   print("\t%i: %s (%i)" % (i, bot.name, bot.round1_guess))
+        #   i = i + 1
+    return guess
+
+def ThePerfectFraction(hp, history, ties, alive, start):
+    thePerfectFraction = 7 * hp / 13
+
+    if alive == 2:
+        return hp - 1
+
+    opponent_hp = 100 - sum(history)
+
+    if not history:
+        # Need to up our game to overcome the kickers
+        return 42 + ties
+    if thePerfectFraction > opponent_hp:
+        return opponent_hp + ties
+
+    return thePerfectFraction + 1 + ties
+
+def strikerbot(hp, history, ties, alive, start):
+    #get our magic number (tm) for useful things
+    def magic_number(num):
+        return np.floor(num / 2)
+    #get opponent's hp and round number
+    opp_hp = 100 - sum(history)
+    round = 1
+    if history:
+        round = len(history) + 1
+    #set strike initial value, by default it's all out
+    strike = hp - 1
+    #let 'er rip if last round
+    if alive == 2:
+        return strike
+    if history:
+        if hp > 1:
+            #strike with a special calculation, using magic number shenanigans
+            strike = np.ceil(hp/(2.045 + (magic_number(round) / 250)) ) + 1 + ties + magic_number(ties)
+        else:
+            #fallback
+            strike = 1
+    else:
+        #round 1 damage
+        strike = 42 + ties ** 2
+    if opp_hp <= strike:
+        #if opponent is weaker than strike then don't waste hp
+        strike = opp_hp + ties
+    if strike >= hp:
+        #validations galore
+        strike = hp - 1
+    return strike
+
+def wise_kick(hp, history, ties, alive, start):
+    if 'someone is using my code' == True:
+        return 0 #Haha!
+
+    if alive == 2:
+        return hp-1
+
+    if not history:
+        return 42
+
+    opp_hp = 100 - sum(history)
+    if opp_hp*2 <= hp:
+        return opp_hp + ties
+    else:
+        return min(round(opp_hp/2) + 3 + ties*2, hp-1 + (ties>0))
+
+# def BandaidBot(hp, history, ties, alive, start):
+#     if alive == 2:
+#         return hp-1
+#
+#     if history:
+#         opp_hp = 100 - sum(history)
+#         opp_last_hp = 100 - sum(history[:-1])
+#
+#         if history[-1] <= opp_last_hp / 3:
+#             return 1 + np.random.randint(0, ties)
+#         elif history[-1] > opp_last_hp / 2:
+#             return min(opp_hp - 1, hp)
+#         else:
+#             if history[-1] < hp/2:
+#                 return np.random.randint(history[-1], hp/2)
+#             else:
+#                 return np.floor(hp/2)
+#     else:
+#         return np.floor(hp/3)
 
 if __name__=='__main__':
     main()
