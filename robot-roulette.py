@@ -48,6 +48,8 @@ def reset_bracket():
     bracket['SpreaderBot'] = RouletteBot(Spreader)
     bracket['KickBot'] = RouletteBot(kick)
     bracket['SarcomaBotMk11'] = RouletteBot(sarcoma_bot_mk_eleven)
+    bracket['SarcomaBotMk11-1'] = RouletteBot(sarcoma_bot_mk_eleven)
+    bracket['SarcomaBotMk11-2'] = RouletteBot(sarcoma_bot_mk_eleven)
     bracket['TENaciousBot'] = RouletteBot(TENacious_bot)
     bracket['SurvivalistBot'] = RouletteBot(SurvivalistBot)
     bracket['HalvsiestBot'] = RouletteBot(HalvsiesBot)
