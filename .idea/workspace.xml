@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b3dcaefd-b561-4191-9443-da755f3ba586" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/robot-roulette.py" beforeDir="false" afterPath="$PROJECT_DIR$/robot-roulette.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -11,17 +12,18 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/RobotRoulette$robot_roulette.coverage" NAME="robot-roulette Coverage Results" MODIFIED="1538739612253" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RobotRoulette$robot_roulette.coverage" NAME="robot-roulette Coverage Results" MODIFIED="1538782202589" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FUSProjectUsageTrigger">
     <session id="-240582830">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="1" />
+          <entry key="project.closed" value="2" />
           <entry key="project.open.time.1" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.33" value="1" />
-          <entry key="project.opened" value="3" />
+          <entry key="project.open.time.67" value="1" />
+          <entry key="project.opened" value="4" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -36,12 +38,12 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="2479" />
+          <entry key="py" value="2739" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="2479" />
+          <entry key="Python" value="2739" />
         </counts>
       </usages-collector>
     </session>
@@ -51,8 +53,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/robot-roulette.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1541">
-              <caret line="950" lean-forward="true" selection-start-line="950" selection-end-line="950" />
+            <state relative-caret-position="207">
+              <caret line="1015" lean-forward="true" selection-start-line="1015" selection-end-line="1015" />
             </state>
           </provider>
         </entry>
@@ -63,7 +65,6 @@
     <findStrings>
       <find>Mk2</find>
       <find>MkTw</find>
-      <find>sarco</find>
       <find>p</find>
       <find>anti_gang</find>
       <find>anti_gan</find>
@@ -72,12 +73,13 @@
       <find>&gt;&gt;</find>
       <find>meh_</find>
       <find>sarcom</find>
-      <find>&lt;&lt;&lt;</find>
       <find>mean</find>
       <find>history</find>
       <find>sarcoma</find>
       <find>print</find>
       <find>sar</find>
+      <find>&lt;&lt;&lt;</find>
+      <find>sarco</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -105,6 +107,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -116,7 +119,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -181,14 +183,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="-1" width="1920" height="1055" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25506938" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25773746" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32975295" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.32975295" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32975295" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39957035" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -229,8 +230,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/robot-roulette.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1541">
-          <caret line="950" lean-forward="true" selection-start-line="950" selection-end-line="950" />
+        <state relative-caret-position="207">
+          <caret line="1015" lean-forward="true" selection-start-line="1015" selection-end-line="1015" />
         </state>
       </provider>
     </entry>
